@@ -93,6 +93,9 @@ class UserDetailView(APIView):
         serializer = UserCreateSerializer(user)
         logger.info(f"Admin '{request.user.email}' retrieved details for user: '{user.email}'")
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+    #need to add put and delete methods for user management by admin
 
 
 class UserView(APIView):
@@ -255,6 +258,7 @@ class ResetPasswordView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
+    
   
     def post(self, request):
 
