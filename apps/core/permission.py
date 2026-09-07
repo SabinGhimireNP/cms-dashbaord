@@ -6,7 +6,7 @@ class IsAdmin(BasePermission):
    request.user.is_authenticated and
    request.user.role =='admin'
   )
- 
+  
 
 class IsCMSUser(BasePermission):
  def has_permission(self, request, view):

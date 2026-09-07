@@ -84,6 +84,12 @@ class TenureDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, slug):
+        
+        if not IsAdmin().has_permission(request, self) and not (request.user.is_authenticated and request.user.is_staff):
+            return Response(
+            {"detail": "You do not have permission to perform this action."},
+            status=status.HTTP_403_FORBIDDEN
+        )
         tenure = self.get_object(slug)
         tenure_name = tenure.name
         tenure.delete()
