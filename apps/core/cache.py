@@ -70,3 +70,15 @@ class StandardCachePaginationMixin(StandardCacheMixin):
         # Caches raw response data dictionary (safe for paginated structures)
         cache.set(cache_key, response.data, self.cache_timeout)
         return response
+    
+class StandardCacheRetrieveMixin(StandardCacheMixin):
+    def retrieve(self, request, *args, **kwargs):
+        cache_key = self.get_cache_key()
+        cached_data = cache.get(cache_key)
+
+        if cached_data is not None:
+            return Response(cached_data)
+
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response.data, self.cache_timeout)
+        return response
