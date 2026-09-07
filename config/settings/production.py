@@ -1,12 +1,13 @@
 from .base import *
 import os
 import dj_database_url
-import cloudinary
 
 
 USE_CLOUDINARY = os.environ.get("USE_CLOUDINARY", "true").lower() == "true"
 
 if USE_CLOUDINARY:
+    import cloudinary
+
     cloudinary.config(
         cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
         api_key=os.environ.get("CLOUDINARY_API_KEY"),
