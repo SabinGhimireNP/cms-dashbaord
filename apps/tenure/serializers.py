@@ -26,6 +26,13 @@ class TenureDropdownSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "slug", "start_date", "end_date"]
 
 
+class TenureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Tenure
+        fields = ["id", "name", "start_date", "end_date", "slug"]
+        read_only_fields = ["slug"]
+
+
 class TenureMembershipSerializer(serializers.ModelSerializer):
 
     member = MemberSerializer(read_only=True)
