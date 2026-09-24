@@ -5,10 +5,9 @@ from .models import PastPaper
 from .serializers import PastPaperSerializer
 from django.http import Http404
 from rest_framework import status
-from rest_framework.parsers import JSONParser, MultiPartParser, FormParser 
-# from apps.core.pagination import StandardPagination
-from apps.core.permission import IsAdmin, IsCMSUser
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from apps.core.pagination import StandardPagination
+from apps.core.permission import IsAdmin, IsCMSUser
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -20,9 +19,43 @@ class PastPaperListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     
-    @method_decorator(cache_page(60 * 5), name='dispatch')
     def get(self, request):
         papers = PastPaper.objects.all()
+
+        search = request.query_params.get('search')
+        semester_filter = request.query_params.get('semester')
+        model_set_filter = request.query_params.get('model_set')
+        exam_year_filter = request.query_params.get('exam_year')
+
+        if search:
+            papers = papers.filter(subject_name__icontains=search)
+        if semester_filter:
+            papers = papers.filter(semester=semester_filter)
+        if model_set_filter is not None and model_set_filter != '':
+            papers = papers.filter(model_set=(model_set_filter.lower() in ('true', '1', 'yes')))
+        if exam_year_filter:
+            papers = papers.filter(exam_year=exam_year_filter)
+
+        ordering = request.query_params.get('ordering')
+        if ordering:
+            is_desc = ordering.startswith('-')
+            field = ordering.lstrip('-')
+            mapping = {
+                'subject_name': 'subject_name',
+                'semester': 'semester',
+                'exam_year': 'exam_year',
+                'model_set': 'model_set',
+            }
+            db_field = mapping.get(field, field)
+            if is_desc:
+                db_field = f'-{db_field}'
+            try:
+                papers = papers.order_by(db_field)
+            except Exception:
+                papers = papers.order_by('-exam_year', '-semester', 'subject_name')
+        else:
+            papers = papers.order_by('-exam_year', '-semester', 'subject_name')
+
         paginator = StandardPagination()
         paginated_papers = paginator.paginate_queryset(papers, request)
         serializer = PastPaperSerializer(paginated_papers, many=True)
@@ -51,7 +84,6 @@ class PastPaperDetailView(APIView):
         except PastPaper.DoesNotExist:
             return None
         
-    @method_decorator(cache_page(60 * 5), name='dispatch')   
     def get(self, request, slug):
         paper = self.get_object(slug)
         if paper is None:
@@ -76,9 +108,10 @@ class PastPaperDetailView(APIView):
         paper = self.get_object(slug)
         if paper is None:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        paper_subject = paper.subject_name
         paper.delete()
         
         logger.info(
-            f"Past paper '{paper.title}' (Slug: {slug}) was deleted by User: {request.user}"
+            f"Past paper '{paper_subject}' (Slug: {slug}) was deleted by User: {request.user}"
         )
         return Response(status=status.HTTP_204_NO_CONTENT)

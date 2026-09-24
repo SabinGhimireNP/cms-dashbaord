@@ -78,10 +78,35 @@ class CertificateListView(APIView):
     def get(self, request):
         certificates = Certificate.objects.select_related('event').all()
         search_query = request.query_params.get('search', None)
-        if search_query: 
+        if search_query:
+            from django.db.models import Q 
             logger.info(f"Certificate search triggered with query: '{search_query}'")
-            certificates = certificates.filter(event__title__icontains=search_query)  
+            certificates = certificates.filter(
+                Q(event__title__icontains=search_query) | 
+                Q(full_name__icontains=search_query)
+            )  
             
+        ordering = request.query_params.get('ordering')
+        if ordering:
+            is_desc = ordering.startswith('-')
+            field = ordering.lstrip('-')
+            # map frontend field to backend field if necessary
+            mapping = {
+                'id': 'certificate_id',
+                'event': 'event__title',
+                'fullName': 'full_name',
+                'createdAt': 'issued_at'
+            }
+            db_field = mapping.get(field, field)
+            if is_desc:
+                db_field = f'-{db_field}'
+            try:
+                certificates = certificates.order_by(db_field)
+            except Exception:
+                certificates = certificates.order_by('-issued_at')
+        else:
+            certificates = certificates.order_by('-issued_at')
+
         paginator = StandardPagination()
         result_page = paginator.paginate_queryset(certificates, request)
 
