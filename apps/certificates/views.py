@@ -151,6 +151,13 @@ class CertificateDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, certificate_id):
+        
+        if not IsAdmin().has_permission(request, self) and not (request.user.is_authenticated and request.user.is_staff):
+            return Response(
+            {"detail": "You do not have permission to perform this action."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+            
         certificate = self.get_object(certificate_id)
         certificate.delete()
         logger.info(f"Certificate '{certificate_id}' deleted by user: {request.user}")

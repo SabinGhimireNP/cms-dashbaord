@@ -23,7 +23,7 @@ class MemberSerializer(serializers.ModelSerializer):
 class TenureDropdownSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Tenure
-        fields = ["id", "name", "slug", "start_date", "end_date"]
+        fields = ["id", "name", "slug","signature", "start_date", "end_date"]
 
 
 class TenureSerializer(serializers.ModelSerializer):
@@ -128,4 +128,4 @@ class DetailedTenureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Tenure
-        fields = ["id", "name", "start_date", "end_date", "slug", "memberships"]
+        fields = ["id", "name", "start_date","signature", "end_date", "slug", "memberships"]

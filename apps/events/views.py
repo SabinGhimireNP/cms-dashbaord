@@ -11,7 +11,7 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from .models import Event, Mentor
 from .serializers import EventSerializer, MentorSerializer
 from apps.core.pagination import StandardPagination
-from apps.core.permission import IsCMSUser
+from apps.core.permission import IsCMSUser, IsAdmin
 
 logger = logging.getLogger("event")
 
@@ -141,6 +141,13 @@ class EventDetailsView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, slug):
+        
+        if not IsAdmin().has_permission(request, self) and not (request.user.is_authenticated and request.user.is_staff):
+            return Response(
+            {"detail": "You do not have permission to perform this action."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+        
         event = self.get_object(slug)
         event_title = event.title
         event.delete()
@@ -261,6 +268,13 @@ class MentorDetailsView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, slug):
+        
+        if not IsAdmin().has_permission(request, self) and not (request.user.is_authenticated and request.user.is_staff):
+            return Response(
+            {"detail": "You do not have permission to perform this action."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+        
         mentor = self.get_object(slug)
         mentor_name = mentor.name
         mentor.delete()

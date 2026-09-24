@@ -93,6 +93,9 @@ class UserDetailView(APIView):
         serializer = UserCreateSerializer(user)
         logger.info(f"Admin '{request.user.email}' retrieved details for user: '{user.email}'")
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+    #need to add put and delete methods for user management by admin
 
 
 class UserView(APIView):
@@ -146,73 +149,7 @@ class ChangePasswordView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-
-
-# class TestEmailView(APIView):
-#     # Removing permission guard if it's meant to be public, but adding auth logging if user context is available
-#     def get(self, request):
-#         caller = request.user.email if request.user.is_authenticated else "Anonymous"
-#         try:
-#             send_mail(
-#                 subject="SMTP Test",
-#                 message="Congratulations! Your Django SMTP setup is working.",
-#                 from_email=settings.EMAIL_HOST_USER,
-#                 recipient_list=[settings.EMAIL_HOST_USER],
-#                 fail_silently=False,
-#                 )
-#             logger.info(f"SMTP Test email successfully sent by operator: '{caller}'")
-#             return Response({
-#                 "message": "Email sent successfully"
-#             })
-#         except Exception as e:
-#             logger.error(f"SMTP Test email delivery failed for operator '{caller}'. Error Details: {str(e)}")
-#             return Response(
-#                 {"error": "Email system configuration issue encountered."},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
-
-
-#   class ForgotPasswordView(APIView):
-#     def post(self, request):
-#         serializer = ForgotPasswordSerializer(data=request.data)
-#         if serializer.is_valid():
-#             email = serializer.validated_data["email"]
-#             try:
-#                 user = User.objects.get(email=email)
-#                 uid = urlsafe_base64_encode(force_bytes(user.pk))
-#                 token = default_token_generator.make_token(user)
-                
-#                 reset_link = f"http://localhost:3000/reset-password/{uid}/{token}/"
-
-#                 send_mail(
-#                     subject="Password Reset Request",
-#                     message=f"\nHi {user.username},\n\nClick the link below to reset your password:\n\n{reset_link}\n\nIf you didn't request this, ignore this email.\n",
-#                     from_email=settings.EMAIL_HOST_USER,
-#                     recipient_list=[user.email],
-#                     fail_silently=False
-#                 )
-#                 logger.info(f"Password reset link dispatched successfully to target: '{email}'")
-
-#             except User.DoesNotExist:
-               
-#                 logger.warning(f"Password reset requested for non-registered email: '{email}'")
-#                 pass
-#             except Exception as mail_err:
-#                 logger.error(f"Failed to transmit reset email to target '{email}'. Technical error: {str(mail_err)}")
-
-#             return Response(
-#                 {
-#                     "message": "If an account exists, a reset email has been sent."
-#                 },
-#                 status=status.HTTP_200_OK
-#             )
-
-#         return Response(
-#             serializer.errors,
-#             status=status.HTTP_400_BAD_REQUEST
-#         )
-
-
+        
 class ResetPasswordView(APIView):
     permission_classes = [IsAdmin]
     throttle_classes = [UserRateThrottle]
@@ -255,6 +192,7 @@ class ResetPasswordView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
+    
   
     def post(self, request):
 
