@@ -15,6 +15,7 @@ from .serializers import (
     MemberProfileSerializer,
     TenureDropdownSerializer,
     DetailedTenureSerializer,
+    TenureSerializer,
     TenureMembershipSerializer,
     AlumniSerializer,
 )
