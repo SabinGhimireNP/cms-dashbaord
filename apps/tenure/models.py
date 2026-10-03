@@ -53,7 +53,6 @@ class Member(TimeStampModel):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)   
-    member_id = models.CharField(max_length=20, unique=True, blank=True)
     image = models.ImageField(
         upload_to=SecureFilePath("member_images/"),
         validators=[validate_file_size],
@@ -70,18 +69,6 @@ class Member(TimeStampModel):
         ordering = ["name"]
 
     def save(self, *args, **kwargs):
-        if not self.member_id:
-            last_member = Member.objects.exclude(member_id='').order_by('-member_id').first()
-            if last_member and last_member.member_id.startswith('MEM-'):
-                try:
-                    last_num = int(last_member.member_id.split('-')[1])
-                    new_num = last_num + 1
-                except ValueError:
-                    new_num = 1
-            else:
-                new_num = 1
-            self.member_id = f"MEM-{str(new_num).zfill(4)}"
-
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug

@@ -1,16 +1,13 @@
 # Generated manually
 
 from django.db import migrations, models
-import django.db.models.deletion
 
-def backfill_admin_accounts(apps, schema_editor):
+def backfill_admin_id(apps, schema_editor):
     User = apps.get_model('users', 'User')
-    AdminAccount = apps.get_model('users', 'AdminAccount')
-    
-    # Create an AdminAccount for every user
-    for i, user in enumerate(User.objects.all()):
-        admin_id = f"adm-{str(i+1).zfill(3)}"
-        AdminAccount.objects.create(user=user, admin_id=admin_id)
+    users = User.objects.filter(admin_id='')
+    for i, user in enumerate(users):
+        user.admin_id = f"adm-{str(i+1).zfill(3)}"
+        user.save(update_fields=['admin_id'])
 
 class Migration(migrations.Migration):
 
@@ -19,13 +16,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='AdminAccount',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('admin_id', models.CharField(blank=True, max_length=20, unique=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='admin_account', to='users.user')),
-            ],
+        migrations.AddField(
+            model_name='user',
+            name='admin_id',
+            field=models.CharField(blank=True, max_length=20, unique=True),
         ),
-        migrations.RunPython(backfill_admin_accounts, migrations.RunPython.noop),
+        migrations.RunPython(backfill_admin_id, migrations.RunPython.noop),
     ]
