@@ -12,6 +12,7 @@ class LoginSerializer(serializers.Serializer):
 
 class UserCreateSerializer(serializers.ModelSerializer) :
     password = serializers.CharField(write_only=True)  
+    admin_id = serializers.CharField(source='admin_account.admin_id', read_only=True)
    
    
     class Meta:
@@ -25,6 +26,10 @@ class UserCreateSerializer(serializers.ModelSerializer) :
         user = User(**validated_data)
         user.set_password(password)
         user.save()
+        
+        from .models import AdminAccount
+        AdminAccount.objects.create(user=user)
+        
         return user
     
     def validate_email(self, value):
@@ -43,6 +48,7 @@ class UserCreateSerializer(serializers.ModelSerializer) :
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    admin_id = serializers.CharField(source='admin_account.admin_id', read_only=True)
 
     class Meta:
         model = User

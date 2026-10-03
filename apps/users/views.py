@@ -60,7 +60,7 @@ class LoginView(APIView):
                     "email": user.email,
                     "user_role": user.role,
                     "can_change_passwords": user.groups.filter(name='can_change_passwords').exists(),
-                    "admin_id": user.admin_id,
+                    "admin_id": user.admin_account.admin_id if hasattr(user, 'admin_account') else None,
                     "profile_picture": user.profile_picture.url if user.profile_picture else None
                 }
             },
