@@ -58,8 +58,9 @@ class LoginView(APIView):
                 "user": {
                     "id": user.id,
                     "email": user.email,
-                    "username": user.username,
                     "user_role": user.role,
+                    "can_change_passwords": user.groups.filter(name='can_change_passwords').exists(),
+                    "admin_id": user.admin_id,
                     "profile_picture": user.profile_picture.url if user.profile_picture else None
                 }
             },
@@ -97,7 +98,16 @@ class UserDetailView(APIView):
     
     def put(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
-        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        
+        # Check password change permission
+        has_perm = request.user.groups.filter(name='can_change_passwords').exists()
+        
+        update_data = request.data
+        if not has_perm and 'password' in update_data:
+            update_data = update_data.copy()
+            update_data.pop('password', None)
+            
+        serializer = UserUpdateSerializer(user, data=update_data, partial=True)
         if serializer.is_valid():
             serializer.save()
             logger.info(f"Admin '{request.user.email}' updated user '{user.email}'")

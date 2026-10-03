@@ -16,7 +16,8 @@ class UserCreateSerializer(serializers.ModelSerializer) :
    
     class Meta:
         model = User
-        fields = ['username','email','password','role','profile_picture']
+        fields = ['id', 'username', 'email', 'password', 'role', 'profile_picture', 'date_joined', 'admin_id']
+        read_only_fields = ['id', 'date_joined', 'admin_id']
 
 
     def create(self,validated_data):
@@ -45,7 +46,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'role', 'profile_picture']
+        fields = ['username', 'email', 'password', 'role', 'profile_picture', 'admin_id']
+        read_only_fields = ['admin_id']
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
