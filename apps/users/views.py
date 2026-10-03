@@ -106,6 +106,17 @@ class UserDetailView(APIView):
         logger.warning(f"User update failed by Admin '{request.user.email}'. Errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            logger.info(f"Admin '{request.user.email}' patched user '{user.email}'")
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        logger.warning(f"User patch failed by Admin '{request.user.email}'. Errors: {serializer.errors}")
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, user_id):
         if str(request.user.id) == str(user_id):
             return Response({"error": "You cannot delete your own account."}, status=status.HTTP_400_BAD_REQUEST)
