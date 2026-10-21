@@ -57,7 +57,6 @@ class Member(TimeStampModel):
 
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=20, null=True, blank=True)   
     image = models.ImageField(
         upload_to=SecureFilePath("member_images/"),
         validators=[validate_file_size],
@@ -68,6 +67,13 @@ class Member(TimeStampModel):
     fb_link = models.URLField(null=True, blank=True)
     linkedin_link = models.URLField(null=True, blank=True)
     github_link = models.URLField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    skills = models.JSONField(default=list, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[("published", "Published"), ("draft", "Draft")],
+        default="published",
+    )
     slug = models.SlugField(unique=True, blank=True, db_index=True)
 
     class Meta:
@@ -110,6 +116,11 @@ class TenureMembership(TimeStampModel):
     order = models.PositiveIntegerField(
         default=99,
         help_text="Order of hierarchy: 1=President, 2=Vice President, 3=Secretary, etc.",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=[("published", "Published"), ("draft", "Draft")],
+        default="published",
     )
 
     class Meta:

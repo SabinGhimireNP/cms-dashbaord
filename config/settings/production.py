@@ -40,11 +40,9 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
-CSRF_TRUSTED_ORIGINS = [
+CSRF_TRUSTED_ORIGINS = list(set(CSRF_TRUSTED_ORIGINS + [
     "https://cms.csitabmc.com",
-    # Add Render URL if you're still testing there
-    
-]
+]))
 
 
 DATABASES = {

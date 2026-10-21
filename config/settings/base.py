@@ -5,6 +5,9 @@ import os
 # Corrected path calculation for being 3 folders deep now
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+from dotenv import load_dotenv
+load_dotenv(BASE_DIR / ".env")
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -43,9 +46,9 @@ INSTALLED_APPS = [
     'corsheaders',]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,9 +60,11 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'config.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 

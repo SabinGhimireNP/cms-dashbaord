@@ -10,11 +10,13 @@ class MemberSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "email",
-            "phone_number",
             "image",
             "fb_link",
             "linkedin_link",
             "github_link",
+            "description",
+            "skills",
+            "status",
             "slug",
         ]
         read_only_fields = ["slug"]
@@ -53,6 +55,7 @@ class TenureMembershipSerializer(serializers.ModelSerializer):
             "role_type",
             "designation",
             "order",
+            "status",
         ]
 
 
@@ -70,6 +73,7 @@ class MemberHistoryMembershipSerializer(serializers.ModelSerializer):
             "role_type",
             "designation",
             "order",
+            "status",
         ]
 
 
@@ -85,11 +89,13 @@ class MemberProfileSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "email",
-            "phone_number",
             "image",
             "fb_link",
             "linkedin_link",
             "github_link",
+            "description",
+            "skills",
+            "status",
             "slug",
             "history",
         ]
@@ -107,6 +113,7 @@ class AlumniSerializer(serializers.ModelSerializer):
         source="tenures",
         many=True,
         write_only=True,
+        required=False,
     )
 
     class Meta:
@@ -120,6 +127,17 @@ class AlumniSerializer(serializers.ModelSerializer):
             "graduation_year",
             "bio",
         ]
+        extra_kwargs = {
+            "bio": {"required": False, "allow_blank": True, "allow_null": True},
+            "graduation_year": {"required": False, "allow_null": True},
+        }
+
+    def update(self, instance, validated_data):
+        tenures = validated_data.pop("tenures", None)
+        instance = super().update(instance, validated_data)
+        if tenures is not None:
+            instance.tenures.set(tenures)
+        return instance
 
 
 class DetailedTenureSerializer(serializers.ModelSerializer):
